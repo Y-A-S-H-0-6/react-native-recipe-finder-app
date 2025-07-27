@@ -1,4 +1,5 @@
 import { useSignUp } from "@clerk/clerk-expo";
+import { useGlobalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   View,
@@ -13,7 +14,9 @@ import {
 import { authStyles } from "../../assets/styles/auth.styles";
 import { Image } from "expo-image";
 import { COLORS } from "../../constants/colors";
-const VerifyEmail = ({ email, onBack }) => {
+const VerifyEmail = () => {
+  const { email } = useGlobalSearchParams();
+  const router = useRouter();
   const { isLoaded, signUp, setActive } = useSignUp();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,10 +26,13 @@ const VerifyEmail = ({ email, onBack }) => {
 
     setLoading(true);
     try {
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({ code });
+      const signUpAttempt = await signUp.attemptEmailAddressVerification({
+        code,
+      });
 
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
+        router.replace("/");
       } else {
         Alert.alert("Error", "Verification failed. Please try again.");
         console.error(JSON.stringify(signUpAttempt, null, 2));
@@ -61,7 +67,9 @@ const VerifyEmail = ({ email, onBack }) => {
 
           {/* Title */}
           <Text style={authStyles.title}>Verify Your Email</Text>
-          <Text style={authStyles.subtitle}>We&apos;ve sent a verification code to {email}</Text>
+          <Text style={authStyles.subtitle}>
+            We&apos;ve sent a verification code to {email}
+          </Text>
 
           <View style={authStyles.formContainer}>
             {/* Verification Code Input */}
@@ -79,16 +87,24 @@ const VerifyEmail = ({ email, onBack }) => {
 
             {/* Verify Button */}
             <TouchableOpacity
-              style={[authStyles.authButton, loading && authStyles.buttonDisabled]}
+              style={[
+                authStyles.authButton,
+                loading && authStyles.buttonDisabled,
+              ]}
               onPress={handleVerification}
               disabled={loading}
               activeOpacity={0.8}
             >
-              <Text style={authStyles.buttonText}>{loading ? "Verifying..." : "Verify Email"}</Text>
+              <Text style={authStyles.buttonText}>
+                {loading ? "Verifying..." : "Verify Email"}
+              </Text>
             </TouchableOpacity>
 
             {/* Back to Sign Up */}
-            <TouchableOpacity style={authStyles.linkContainer} onPress={onBack}>
+            <TouchableOpacity
+              style={authStyles.linkContainer}
+              onPress={() => router.back()}
+            >
               <Text style={authStyles.linkText}>
                 <Text style={authStyles.link}>Back to Sign Up</Text>
               </Text>

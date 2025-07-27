@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { ENV } from "./config/env.js";
 import { db } from "./config/db.js";
 import { favoritesTable } from "./db/schema.js";
@@ -10,6 +11,8 @@ const PORT = ENV.PORT || 5001;
 
 if (ENV.NODE_ENV === "production") job.start();
 
+
+app.use(cors()); // ✅ Enable CORS for mobile access
 app.use(express.json());
 
 app.get("/api/health", (req, res) => {
@@ -76,6 +79,6 @@ app.delete("/api/favorites/:userId/:recipeId", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on PORT:", PORT);
 });
